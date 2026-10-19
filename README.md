@@ -41,3 +41,79 @@ crypto-ingestion-engine/
 │   └── test_pipeline.py          # Pytest unit & integration tests
 ├── requirements.txt
 └── README.md
+
+
+
+
+┌───────────────────────┐
+               │      GitHub API       │
+               │ (/repos/.../issues)   │
+               └───────────┬───────────┘
+                           │ HTTP Request (Pagination & Rate Limit Headers)
+                           ▼
+               ┌───────────────────────┐
+               │    Bronze Layer       │ (Raw JSON dumps stored locally / partitioned)
+               └───────────┬───────────┘
+                           │ Parsing & Flattening (Pandas / Polars)
+                           ▼
+               ┌───────────────────────┐
+               │    Silver Layer       │ (Cleaned Parquet tables with enforced schemas)
+               └───────────┬───────────┘
+                           │ Aggregations & Window Functions
+                           ▼
+               ┌───────────────────────┐
+               │     Gold Layer        │ (Business-ready developer metrics & summary marts)
+               └───────────────────────┘
+
+
+
+
+
+
+
+
+
+
+
+
+
+               github-activity-pipeline/
+├── data/
+│   ├── bronze/                  # Raw JSON snapshots
+│   ├── silver/                  # Cleaned Parquet files
+│   └── gold_warehouse.db        # DuckDB / SQLite final analytics mart
+├── src/
+│   ├── __init__.py
+│   ├── extract_bronze.py        # GitHub API client with pagination & rate-limit tracking
+│   ├── transform_silver.py      # Flattens nested JSON payloads into structured Parquet
+│   └── load_gold.py             # Computes aggregate metrics and loads into DuckDB
+├── requirements.txt
+└── README.md
+
+
+
+
+
+
+
+
+┌───────────────────────┐         ┌───────────────────────┐
+               │  REST Countries API   │         │    World Bank API     │
+               │ (Geographic metadata) │         │ (Economic indicators) │
+               └───────────┬───────────┘         └───────────┬───────────┘
+                           │                                 │
+                           └───────────────┬─────────────────┘
+                                           ▼
+                           ┌───────────────────────────────┐
+                           │ Python Ingestion & Normalizer │ (Pandas / Polars merging)
+                           └───────────────┬───────────────┘
+                                           ▼
+                           ┌───────────────────────────────┐
+                           │ DuckDB / PostgreSQL Warehouse │ 
+                           │ ├── dim_country               │
+                           │ └── fact_economic_indicators  │
+                           └───────────────────────────────┘
+
+
+
+                           

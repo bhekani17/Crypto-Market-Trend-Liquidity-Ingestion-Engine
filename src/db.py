@@ -1,8 +1,9 @@
 import duckdb
-from src.config import DB_FILEPATH
+from src.config import DATA_DIR, DB_FILEPATH
 
 def get_connection():
-    return duckdb.connect(DB_FILEPATH)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    return duckdb.connect(str(DB_FILEPATH))
 
 def initialize_database():
     """Sets up the target production table in DuckDB."""

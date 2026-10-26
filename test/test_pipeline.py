@@ -32,3 +32,20 @@ def test_invalid_price_fails_validation():
     
     with pytest.raises(ValidationError):
         validate_data(sample_invalid_raw)
+
+
+def test_database_initialization_creates_table(tmp_path, monkeypatch):
+    from src import db
+
+    test_db = tmp_path / "crypto.db"
+    monkeypatch.setattr(db, "DB_FILEPATH", test_db)
+
+    db.initialize_database()
+    conn = db.get_connection()
+    tables = conn.execute(
+        "SELECT table_name FROM information_schema.tables "
+        "WHERE table_name = 'fact_crypto_market_ticks'"
+    ).fetchall()
+    conn.close()
+
+    assert tables == [("fact_crypto_market_ticks",)]

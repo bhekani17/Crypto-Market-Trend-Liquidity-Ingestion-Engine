@@ -1,13 +1,17 @@
+import pandas as pd
 import duckdb
+from src.config import DATA_DIR
 from src.transform import fetch_country_metadata, fetch_world_bank_indicators
 
 def build_warehouse():
-    conn = duckdb.connect("data/world_warehouse.db")
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    conn = duckdb.connect(str(DATA_DIR / "world_warehouse.db"))
     
     print("Extracting country metadata...")
     df_countries = fetch_country_metadata()
     
     # Create Dimension Table: dim_country
+    conn.execute("DROP TABLE IF EXISTS fact_economic_indicators;")
     conn.execute("DROP TABLE IF EXISTS dim_country;")
     conn.execute("""
         CREATE TABLE dim_country (
@@ -34,7 +38,6 @@ def build_warehouse():
     df_indicators = pd.DataFrame(all_indicators)
     
     # Create Fact Table: fact_economic_indicators
-    conn.execute("DROP TABLE IF EXISTS fact_economic_indicators;")
     conn.execute("""
         CREATE TABLE fact_economic_indicators (
             country_code VARCHAR,
@@ -52,7 +55,6 @@ def build_warehouse():
     
     # Run a test analytical query joining dimension and fact tables
     result = conn.execute("""
-        D:
         SELECT 
             c.region,
             f.year,

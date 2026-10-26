@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Pulse</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">M</span><span>Market Pulse</span></div>
+    <nav aria-label="Primary navigation">
+      <a class="nav-item active" href="#overview"><span class="nav-dot"></span>Overview</a>
+      <a class="nav-item" href="#assets"><span class="nav-dot"></span>Assets</a>
+      <a class="nav-item" href="#activity"><span class="nav-dot"></span>Activity</a>
+    </nav>
+    <div class="source-status">
+      <span class="status-dot"></span>
+      <div><strong>Live source</strong><small>CoinGecko API</small></div>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" id="todayLabel">Market overview</p>
+        <h1>Crypto dashboard</h1>
+      </div>
+      <button class="refresh-button" id="refreshButton" type="button">
+        <span aria-hidden="true">↻</span> Refresh data
+      </button>
+    </header>
+
+    <section class="metrics" id="overview">
+      <article class="metric">
+        <div class="metric-label"><span>Tracked assets</span><span class="metric-index">01</span></div>
+        <strong id="coinCount">0</strong>
+        <small>coins monitored</small>
+      </article>
+      <article class="metric">
+        <div class="metric-label"><span>Market value</span><span class="metric-index">02</span></div>
+        <strong id="marketCap">--</strong>
+        <small>combined market cap</small>
+      </article>
+      <article class="metric">
+        <div class="metric-label"><span>24h volume</span><span class="metric-index">03</span></div>
+        <strong id="volume">--</strong>
+        <small>latest reported volume</small>
+      </article>
+      <article class="metric accent">
+        <div class="metric-label"><span>Last update</span><span class="metric-index">04</span></div>
+        <strong id="lastUpdate">--</strong>
+        <small id="updateDetail">Waiting for data</small>
+      </article>
+    </section>
+
+    <section class="workspace" id="assets">
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Price movement</p>
+            <h2 id="chartTitle">Select an asset</h2>
+          </div>
+          <div class="chart-total">
+            <span id="chartLabel">Current price</span>
+            <strong id="chartPrice">--</strong>
+          </div>
+        </div>
+        <div class="chart-wrap" id="chartWrap">
+          <svg id="priceChart" viewBox="0 0 760 280" role="img" aria-label="Asset price history"></svg>
+          <div class="empty-chart" id="emptyChart">
+            <strong>No price history yet</strong>
+            <span>Refresh the pipeline to begin tracking assets.</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="movers-panel">
+        <div class="panel-header compact">
+          <div><p class="eyebrow">24h signal</p><h2>Market movers</h2></div>
+        </div>
+        <div class="movers" id="movers"></div>
+      </aside>
+    </section>
+
+    <section class="assets-table" id="activity">
+      <div class="table-header">
+        <div><p class="eyebrow">Watchlist</p><h2>Tracked assets</h2></div>
+        <label class="search-box">
+          <span>Search</span>
+          <input id="assetSearch" type="search" placeholder="Coin or symbol" autocomplete="off">
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Asset</th><th>Price</th><th>24h change</th><th>Market cap</th><th>Volume</th><th></th></tr>
+          </thead>
+          <tbody id="assetRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

@@ -1,10 +1,11 @@
 import os
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
+from src.config import DATA_DIR
 
-BRONZE_DIR = os.path.join("data", "bronze")
-os.makedirs(BRONZE_DIR, exist_ok=True)
+BRONZE_DIR = DATA_DIR / "bronze"
+BRONZE_DIR.mkdir(parents=True, exist_ok=True)
 
 def fetch_repo_issues(owner: str, repo: str):
     """Fetches public issues from a GitHub repository handling pagination."""
@@ -15,7 +16,7 @@ def fetch_repo_issues(owner: str, repo: str):
     all_issues = []
     
     while True:
-        response = requests.get(url, params=params, headers=headers)
+        response = requests.get(url, params=params, headers=headers, timeout=10)
         response.raise_for_status()
         
         # Check remaining rate limits
@@ -34,8 +35,8 @@ def fetch_repo_issues(owner: str, repo: str):
             break
 
     # Save raw snapshot to Bronze Layer
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    filepath = os.path.join(BRONZE_DIR, f"issues_{repo}_{timestamp}.json")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    filepath = str(BRONZE_DIR / f"issues_{repo}_{timestamp}.json")
     
     with open(filepath, "w") as f:
         json.dump(all_issues, f, indent=2)

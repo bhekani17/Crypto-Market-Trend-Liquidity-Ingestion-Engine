@@ -9,7 +9,7 @@ class APIError(Exception):
 @retry(
     stop=stop_after_attempt(5),
     wait=wait_exponential(multiplier=2, min=2, max=30),
-    retry=retry_if_exception_type(APIError),
+    retry=retry_if_exception_type((APIError, requests.RequestException)),
     reraise=True
 )
 def fetch_market_data() -> list:

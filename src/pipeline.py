@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import pandas as pd
 from pydantic import BaseModel, Field, PositiveFloat
 from src.db import initialize_database, get_connection
@@ -46,7 +46,7 @@ def run_pipeline():
     })
     
     df['last_updated_at'] = pd.to_datetime(df['last_updated_at'])
-    df['ingested_at'] = datetime.utcnow()
+    df['ingested_at'] = datetime.now(timezone.utc).replace(tzinfo=None)
     
     # Filter specific target columns
     target_columns = [
@@ -72,9 +72,12 @@ def run_pipeline():
        AND target.last_updated_at = source.last_updated_at
         WHEN MATCHED THEN
             UPDATE SET 
+                symbol = source.symbol,
+                name = source.name,
                 price_usd = source.price_usd,
                 market_cap_usd = source.market_cap_usd,
                 total_volume_usd = source.total_volume_usd,
+                price_change_24h = source.price_change_24h,
                 ingested_at = source.ingested_at
         WHEN NOT MATCHED THEN
             INSERT VALUES (

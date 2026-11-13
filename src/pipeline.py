@@ -60,35 +60,36 @@ def run_pipeline():
     
     # Upsert Logic into DuckDB
     conn = get_connection()
-    
-    # Step 1: Write to temporary staging table
-    conn.register("stg_crypto_ticks", df)
-    
-    # Step 2: Idempotent MERGE (Upsert) to prevent duplicates on rerun
-    upsert_query = """
-        MERGE INTO fact_crypto_market_ticks AS target
-        USING stg_crypto_ticks AS source
-        ON target.coin_id = source.coin_id 
-       AND target.last_updated_at = source.last_updated_at
-        WHEN MATCHED THEN
-            UPDATE SET 
-                symbol = source.symbol,
-                name = source.name,
-                price_usd = source.price_usd,
-                market_cap_usd = source.market_cap_usd,
-                total_volume_usd = source.total_volume_usd,
-                price_change_24h = source.price_change_24h,
-                ingested_at = source.ingested_at
-        WHEN NOT MATCHED THEN
-            INSERT VALUES (
-                source.coin_id, source.symbol, source.name,
-                source.price_usd, source.market_cap_usd, source.total_volume_usd,
-                source.price_change_24h, source.last_updated_at, source.ingested_at
-            );
-    """
-    
-    conn.execute(upsert_query)
-    conn.close()
+    try:
+        # Step 1: Write to temporary staging table
+        conn.register("stg_crypto_ticks", df)
+        
+        # Step 2: Idempotent MERGE (Upsert) to prevent duplicates on rerun
+        upsert_query = """
+            MERGE INTO fact_crypto_market_ticks AS target
+            USING stg_crypto_ticks AS source
+            ON target.coin_id = source.coin_id 
+           AND target.last_updated_at = source.last_updated_at
+            WHEN MATCHED THEN
+                UPDATE SET 
+                    symbol = source.symbol,
+                    name = source.name,
+                    price_usd = source.price_usd,
+                    market_cap_usd = source.market_cap_usd,
+                    total_volume_usd = source.total_volume_usd,
+                    price_change_24h = source.price_change_24h,
+                    ingested_at = source.ingested_at
+            WHEN NOT MATCHED THEN
+                INSERT VALUES (
+                    source.coin_id, source.symbol, source.name,
+                    source.price_usd, source.market_cap_usd, source.total_volume_usd,
+                    source.price_change_24h, source.last_updated_at, source.ingested_at
+                );
+        """
+        
+        conn.execute(upsert_query)
+    finally:
+        conn.close()
     print("Pipeline Execution Completed Successfully!")
 
 if __name__ == "__main__":

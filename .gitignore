@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Pytest / Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Generated data artifacts
+data/*.db
+data/*.db.wal
+data/bronze/
+data/silver/
+data/gold/
+
+# IDE / OS
+.DS_Store
+Thumbs.db

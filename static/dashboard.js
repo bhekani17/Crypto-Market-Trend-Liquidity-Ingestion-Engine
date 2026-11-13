@@ -3,6 +3,18 @@ const state = { coins: [], selected: null };
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 2 });
 
+const percent = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function computeChangePct(coin) {
+  const changeUsd = Number(coin.price_change_24h || 0);
+  const price = Number(coin.price_usd || 0);
+  const prevPrice = price - changeUsd;
+  if (prevPrice > 0) {
+    return (changeUsd / prevPrice) * 100;
+  }
+  return 0;
+}
+
 function showToast(message, isError = false) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -50,18 +62,18 @@ async function loadMarket() {
 }
 
 function renderMovers(coins) {
-  const sorted = [...coins].sort((a, b) => (b.price_change_24h || 0) - (a.price_change_24h || 0));
+  const sorted = [...coins].sort((a, b) => computeChangePct(b) - computeChangePct(a));
   const movers = document.getElementById("movers");
   movers.innerHTML = "";
 
   sorted.slice(0, 4).forEach((coin) => {
-    const change = Number(coin.price_change_24h || 0);
+    const changePct = computeChangePct(coin);
     const row = document.createElement("div");
     row.className = "mover";
     row.innerHTML = `
       <span class="coin-avatar">${coin.symbol.slice(0, 3).toUpperCase()}</span>
       <span class="mover-name"><strong>${coin.name}</strong><small>${coin.symbol.toUpperCase()}</small></span>
-      <span class="change ${change >= 0 ? "positive" : "negative"}">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</span>`;
+      <span class="change ${changePct >= 0 ? "positive" : "negative"}">${changePct >= 0 ? "+" : ""}${percent.format(changePct)}%</span>`;
     movers.appendChild(row);
   });
 }
@@ -70,12 +82,12 @@ function renderTable(coins) {
   const tbody = document.getElementById("assetRows");
   tbody.innerHTML = "";
   coins.forEach((coin) => {
-    const change = Number(coin.price_change_24h || 0);
+    const changePct = computeChangePct(coin);
     const row = document.createElement("tr");
     row.innerHTML = `
       <td><div class="asset-cell"><span class="coin-avatar">${coin.symbol.slice(0, 3).toUpperCase()}</span><span><strong>${coin.name}</strong><small>${coin.coin_id}</small></span></div></td>
       <td>${money.format(coin.price_usd)}</td>
-      <td><span class="change ${change >= 0 ? "positive" : "negative"}">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</span></td>
+      <td><span class="change ${changePct >= 0 ? "positive" : "negative"}">${changePct >= 0 ? "+" : ""}${percent.format(changePct)}%</span></td>
       <td>$${compact.format(coin.market_cap_usd || 0)}</td>
       <td>$${compact.format(coin.total_volume_usd || 0)}</td>
       <td><button class="view-button" type="button" data-coin="${coin.coin_id}" aria-label="View ${coin.name}">›</button></td>`;
